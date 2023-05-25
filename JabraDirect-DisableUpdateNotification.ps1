@@ -71,14 +71,12 @@ Function Format-Json {
 # ---------------------------------------------------------------------------------
 # NAME: JabraDirect-DisableUpdateNotification
 # 
-# AUTHOR: Ellis Barrett - A365
-# 
-# CREATION DATE: 14/07/2022
-#
+# 14/07/2022 v1.0 Ellis Barrett - A365 - Initial creation
+# 25/05/2023 v2.0 Sebastian Keller - Modify script to work with ConstrainedLanguageMode, prettify of json is done by software
 # ---------------------------------------------------------------------------------
 
 Write-Output "- Configure Jabra Direct"
-$json = "$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct\config.json"
+$json = "$env:APPDATA\Jabra Direct\config.json"
 if (Test-path("$json")) {
         Write-Output "-- Found the Config File, applying changes"
         $a = Get-Content "$json" -Raw | ConvertFrom-Json
@@ -89,15 +87,15 @@ if (Test-path("$json")) {
         $a.EnableFeedback.value = $false
         $a.EnableFeedback.locked = $true
 
-        $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$json" -Encoding UTF8
+        $a | ConvertTo-Json -Depth 3 | Format-Json -Minify | Set-Content "$json" -Encoding UTF8
         ((Get-Content "$json") -join "`n") + "`n" | Set-Content -NoNewline "$json"
     } else {
         Write-Output "-- Didn't find the Config File"
         #If (Test-path("C:\Program Files (x86)\Jabra\Direct4\jabra-direct.exe")) {
            #Write-Output "--- But Jabra Direct is installed, creating a Config File"
-            If (-Not (Test-Path("$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct"))) {
-                New-Item "$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct" -type directory -Force | out-null
-                Write-Output "-- Created '$([Environment]::GetFolderPath("ApplicationData"))\Jabra Direct'"
+            If (-Not (Test-Path("$env:APPDATA\Jabra Direct"))) {
+                New-Item "$env:APPDATA\Jabra Direct" -type directory -Force | out-null
+                Write-Output "-- Created '$env:APPDATA\Jabra Direct'"
             } 
             $ConfigurationRequest = @{
                 DirectShowNotification = @{
@@ -113,7 +111,7 @@ if (Test-path("$json")) {
             }
             $ConfigurationRequest | ConvertTo-Json -depth 100 | Set-Content "$json"
             $a = Get-Content "$json" -Encoding UTF8 | ConvertFrom-Json
-            $a | ConvertTo-Json -Depth 3 | Format-Json | Set-Content "$json" -Encoding UTF8
+            $a | ConvertTo-Json -Depth 3 | Format-Json -Minify | Set-Content "$json" -Encoding UTF8
             ((Get-Content "$json") -join "`n") + "`n" | Set-Content -NoNewline "$json"
         #}
         
